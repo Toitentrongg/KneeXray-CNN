@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chẩn đoán bệnh qua X-Ray</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <h2 class="text-center mb-4">Chẩn đoán bệnh qua X-Ray</h2>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file">Upload ảnh X-Ray:</label>
+                        <input type="file" name="file" id="file" class="form-control-file" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Dự đoán</button>
+                </form>
+
+                <!-- Hiển thị ảnh đã tải lên -->
+                <div class="mt-4 text-center">
+                    <h5>Ảnh đã chọn:</h5>
+                    <img id="uploadedImage" src="#" alt="Ảnh tải lên" style="max-width: 100%; display: none;">
+                </div>
+
+                <!-- Hiển thị kết quả -->
+                <div id="result" class="mt-4 text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- JavaScript to handle form submission and display image -->
+    <script>
+        $(document).ready(function() {
+            // Hiển thị ảnh đã chọn
+            $('#file').on('change', function(event) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#uploadedImage').attr('src', e.target.result);
+                    $('#uploadedImage').show();  // Hiển thị ảnh sau khi tải lên
+                }
+                reader.readAsDataURL(this.files[0]);  // Đọc file và tạo URL
+            });
+
+            // Gửi dữ liệu khi form được submit
+            $('#uploadForm').on('submit', function(event) {
+                event.preventDefault();
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: "http://localhost:5000/predict",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        $('#result').html('<div class="alert alert-info">Kết quả dự đoán: ' + response.result + '<br></div>');
+                    },
+                    error: function(xhr, status, error) {
+                        $('#result').html('<div class="alert alert-danger">Đã xảy ra lỗi: ' + error + '</div>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
